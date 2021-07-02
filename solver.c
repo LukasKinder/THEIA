@@ -25,7 +25,7 @@ void freeChangeList(ChangeList changes){
   free(changes.previousLabels);
 }
 
-//finds all stable extensions and prints them
+//finds all complete extensions and prints them
 void findComplete(Graph g, bool printTree, bool splitUnjustOuts){
   ChangeList changes = createChangeList(g.numberArguments);
   ArgumentList unjustOuts = NULL;
@@ -87,8 +87,7 @@ void findComplete(Graph g, bool printTree, bool splitUnjustOuts){
   printf("split search total: %d times\n",usedBlank + usedUNJOUT);
 }
 
-/*Function that picks some argument and sets it to IN and OUT and checks if assignment can
-be made legal*/
+/*Function that checks if a solution is found, otherwise an argument is chosen to split the search*/
 void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, Heap *heap,ArgumentList *unjustOuts, bool splitUnjustOuts){
   if (changes->nFinalLabeled == g.numberArguments){
     //all arguments are labeled - a complete extension is found
@@ -117,11 +116,11 @@ void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, Hea
   }
 }
 
-/*can be used if argument a is labeled UNJUSTIFIED_OUT and has only two attackers 'b' and 'c' that can be IN
+/*can be used if argument a is labeled UNJUSTIFIED_OUT and has only two attackers 'b' and 'c' that can be labeled IN
 labels 'b' and 'c' IN 
 or 'b' = IN and 'c' = NOTIN 
 or 'b' = NOTIN and 'c' = IN
-Andpropagates the labeled through the graph respectively.  */
+And propagates the labeled through the graph respectively.  */
 void splitOverUnjustifiedOut(Graph g, Argument a, ChangeList *changes,int level,bool printTree, Heap *heap,ArgumentList *unjustOuts){
 
   printInLevel3("Split search over UNJUSTIFIED_OUT argument ",a->name,"\n", level , printTree);
