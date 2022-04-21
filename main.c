@@ -25,9 +25,6 @@ char *parseArguments(int argc, char *argv[], bool * printTree){
       i+=1; 
     }else if (strcmp(argv[i], "-v") == 0){
       *printTree = true;
-    }else{
-      printf("Unknown argument %s\n", argv[i]);
-      printErrorMessage();
     }
   }
   if (ret == NULL){
