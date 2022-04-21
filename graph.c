@@ -22,8 +22,7 @@ Argument newArgument(char *name){
   a->attackedByOut = 0;
   a->attackedByUndec = 0;
   a->attackedByNotIn = 0;
-  a->indexInHeap = -1;
-  a->nodeOfArgument = NULL;
+  a->attackedByNotUndec = 0;
   return a;
 }
 
@@ -69,15 +68,12 @@ void addSelfAttack(Argument a){
 assumes arguments are numbers from 1 onwards,
 Ending of relations must be indicated as a "-1"
 */
-Graph createGraph(char * filename, float *averageAttacks){
-
-  *averageAttacks = 0;
-
+Graph createGraph(char * filename){
   FILE * fp;
   char c[1000];
   char * line = NULL;
   size_t len = 0;
-  ssize_t read;
+  size_t read;
   fp = fopen(filename, "r");
   if (fp == NULL){
     printf("ERRROR: Could not open file '%s'\n",filename);
@@ -97,7 +93,7 @@ Graph createGraph(char * filename, float *averageAttacks){
       break;
     }
     removeLinebreak(line, (int)read);
-    name1  = malloc(sizeof(char) * ((int)read -1));
+    name1  = malloc(sizeof(char) * ((int)read ));
     strcpy(name1, line);
 
     g.numberArguments++;
@@ -108,15 +104,12 @@ Graph createGraph(char * filename, float *averageAttacks){
     a = newArgument(name1);
     enterArgument(a,dic);
     g.arguments[g.numberArguments-1] = a;
-
   }
 
   while ((read = getline(&line, &len, fp)) != -1){
-
     if (line[0] == '\n'){
       break;
     }
-    *averageAttacks +=1;
     removeLinebreak(line, (int)read);
     name1  = strtok(line," ");
     name2 = strtok(NULL," ");
@@ -132,7 +125,6 @@ Graph createGraph(char * filename, float *averageAttacks){
       addAttackedBy(b, a);
     }
   }
-  *averageAttacks = *averageAttacks / g.numberArguments;
   
   if (line) {
     free(line);
@@ -153,25 +145,25 @@ void printLabel(Label l){
   switch (l)
   {
   case IN:
-    printf("IN\n");
+    printf("IN");
     break;
   case OUT:
-    printf("OUT\n");
+    printf("OUT");
     break;
   case UNDEC:
-    printf("UNDEC\n");
+    printf("UNDEC");
     break;
   case BLANK:
-    printf("BLANK\n");
+    printf("BLANK");
     break;
   case NOTIN:
-    printf("NOTIN\n");
+    printf("NOTIN");
     break;
   case NOTOUT:
-    printf("NOTOUT\n");
+    printf("NOTOUT");
     break;
-  case UNJUSTIFIED_OUT:
-    printf("UNJUSTIFIED_OUT\n");
+  case NOTUNDEC:
+    printf("NOTUNDEC");
     break;
   }
 }
@@ -205,5 +197,32 @@ void removeLinebreak(char *str, int end) {
       str[i] = '\0';
     }
   }
+}
 
+Label oppositLabel(Label l){
+  switch (l){
+  case IN:
+    return NOTIN;
+  case OUT:
+    return NOTOUT;
+  case UNDEC:
+    return NOTUNDEC;
+  case NOTIN:
+    return IN;
+  case NOTOUT:
+    return OUT;
+  case NOTUNDEC:
+    return UNDEC;
+  }
+  exit(1);
+}
+
+void printState(Graph g){
+  Argument b;
+  for (int j = 0; j < g.numberArguments; j++){
+    b = g.arguments[j];
+    printf("%s",b->name);
+    printf(" ");
+    printLabel(b->label);
+  }
 }

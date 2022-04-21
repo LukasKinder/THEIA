@@ -3,14 +3,10 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-
-#include "argumentList.h" //also includes "graph.h"
-#include "heuristic.h"
-#include "heap.h"
-
+#include "graph.h"
 //A list to write down arguments that were changed
 typedef struct ChangeList {
-  //the number of arguments in the list
+  //the length of the list
   int size;
   //the arguments
   Argument *arguments;
@@ -22,27 +18,18 @@ typedef struct ChangeList {
   int nFinalLabeled;
 }ChangeList;
 
+#include "heuristic.h"
 #include "propagateLabels.h"
 
 ChangeList createChangeList();
 void freeChangeList(ChangeList changes);
-
-void findComplete(Graph graph, bool printTree, bool splitUnjustOuts);
-void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, Heap *heap, ArgumentList *unjustOuts, bool splitUnjustOuts);
-void splitOverBlank(Graph g, Argument a,ChangeList *changes,int level,bool printTree, Heap *heap,ArgumentList *unjustOuts, bool splitUnjustOuts);
-void splitOverUnjustifiedOut(Graph g, Argument a,ChangeList *changes,int level,bool printTree, Heap *heap,ArgumentList *unjustOuts);
-
-Argument getNext(Heap *heap, Argument **finalArguments, int *finalIndex);
-
-void updateHeuristic(ChangeList *li, int start, Heap *hp);
-void reverseHeuristic(ChangeList *li, int start, Heap *hp);
-void updateUnjustOutList(ChangeList *li, int start, ArgumentList *unjustOuts, bool splitUnjustOuts);
-void reverseUnjustOutList(ChangeList *li, int end, ArgumentList *unjustOuts, bool splitUnjustOuts);
-
-void addChange(ChangeList *li, Argument a, Label newLabel);
+void findComplete(Graph graph, bool printTree);
+void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree);
 void reverseChanges(ChangeList *changes, int till);
 
-void printInLevel(char * s, int level, bool printTree);
-void printInLevel3(char * s, char * s2, char * s3, int level, bool printTree);
+void addChange(ChangeList *li, Argument a, Label newLabel, int level, bool printTree, Cause cause);
+
+void printInLevel(char * s, int level);
+void printContradiction(Argument a, Label new_label,Cause cause, int level);
 
 #endif

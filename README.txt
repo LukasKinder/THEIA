@@ -1,8 +1,14 @@
-complie with gcc *.c
+complie with gcc *.c -lm -o theia
 
-run with "./a.out <path> print" with <path> being the path to some argumentation frame in trivial graph format 
-and "print" being the optional variable that makes the program print the search tree if print = 1. 
-The default in which the search tree is not printed is print = 0;
+run with "./theia -f <path>" with <path> being the path to some argumentation frame in trivial graph format 
 
-Example "./a.out Frames/BigFrames/n100p3q34ve.tgf"
-or      "./a.out Frames/ICCMA2019.in 1"
+the -v flag may be used to print the search tree
+
+the -p flag may be used as well but the only valid argument is EE-CO (finding all complete sets).
+
+Example:
+./theia -p EE-CO  -f  example_ICCMA2019.tgf 
+or
+./theia -f example_ICCMA2019.tgf -v
+
+

@@ -14,7 +14,7 @@ typedef struct HashTable {
   int *sizeRows;
   int *numberItems;
   Argument **table;
-}HashTable;
+} HashTable;
 
 int stringToInt(char * name);
 Argument nameToArgument(char *name, HashTable dic);

@@ -3,19 +3,12 @@
 #ifndef heuristic_H
 #define heuristic_H
 
-
 #include "graph.h"
-#include "heap.h"
+#include "solver.h"
 
-
-void giveheuristics(Argument *arguments, int size);
-
-void labelFromBlankToNotIn(Argument a, Heap *hp);
-void labelFromBlankToNotOut(Argument a, Heap *hp);
-void labelFromNotInToBlank(Argument a, Heap *hp);
-void labelFromNotOutToBlank(Argument a, Heap *hp);
-
-void increaseHeuristic(Argument a, float change, Heap *hp);
-void decreaseHeuristic(Argument a, float change, Heap *hp);
+void printStatistics();
+int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestArgument, int level, int printTree);
+int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *bestEstimatedTime, Argument *bestArgument, Label *labelSplit, int level, int printTree);
+double estimateSolvingtime(ChangeList changes);
 
 #endif

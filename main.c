@@ -3,35 +3,46 @@
 #include <stdio.h>  
 #include <stdlib.h> 
 
-#include "graph.h"
 #include "solver.h"
 #include <time.h>
 
+void printErrorMessage(){
+  printf("Please call with <theia -p EE-CO -f PATH>\n");
+  exit(1);
+}
+
+char *parseArguments(int argc, char *argv[], bool * printTree){
+  char *ret = NULL;
+  for (int i =1; i < argc; i++){
+    if (strcmp(argv[i], "-p") == 0){
+      if ( strcmp(argv[i+1], "EE-CO") != 0 ){
+        printf("ERROR: The only task implemented is EE-CO\n");
+        printErrorMessage();
+      }
+      i+=1; 
+    }else if (strcmp(argv[i], "-f") == 0){
+      ret = argv[i+1];
+      i+=1; 
+    }else if (strcmp(argv[i], "-v") == 0){
+      *printTree = true;
+    }else{
+      printf("Unknown argument %s\n", argv[i]);
+      printErrorMessage();
+    }
+  }
+  if (ret == NULL){
+    printErrorMessage();
+  }
+  return ret; 
+}
 
 int main(int argc, char *argv[]) {
-
-  if (argc < 2){
-    printf("ERROR: no inout file given\n");
-    exit(1);
-  }
-
   bool printTree = false; 
-  if (argc > 2){
-    printTree =  (argv[2][0] - '0') == 1 ? true : false;
-  }
-
-  float averageAttacks;
-
-  Graph graph = createGraph(argv[1], &averageAttacks);
-
-  if (averageAttacks < 50){
-    findComplete(graph, printTree, true); 
-    printf("(new version)");
-  }else{
-    findComplete(graph, printTree, false); 
-    printf("(old version)");
-  }
+  char * input_file = parseArguments(argc, argv,&printTree);
+  Graph graph = createGraph(input_file);
+  findComplete(graph, printTree); 
   freeGraph(graph); 
-
   return 0;
 }
+
+
