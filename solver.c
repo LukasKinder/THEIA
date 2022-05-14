@@ -23,7 +23,7 @@ void freeChangeList(ChangeList changes){
 }
 
 //finds all complete extensions and prints them
-void findComplete(Graph g, bool printTree){
+void findComplete(Graph g, bool printTree, char heuristic){
   ChangeList changes = createChangeList(g.numberArguments);
   int i;
   Argument a;
@@ -53,21 +53,21 @@ void findComplete(Graph g, bool printTree){
   //printf("Grounded extension: ");
   //printInArguments(g);
   
-  findCompleteRec(g, &changes, 0, printTree);
+  findCompleteRec(g, &changes, 0, printTree, heuristic);
   printf("]\n");
-  //printStatistics();
+  if (printTree) printStatistics();
   freeChangeList(changes);
 }
 
 /*Function that checks if a solution is found, otherwise an argument is chosen to split the search*/
-void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree){
+void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, char heuristic){
 
   Argument a = NULL;
   Label labelToSplit;
   int c = 0;
   while (a == NULL){
     c++;
-    if (!getArgument(g,changes,&labelToSplit, &a, level, printTree)){
+    if (!getArgument(g,changes,&labelToSplit, &a, level, printTree, heuristic)){
       //contradiction found through look-ahead
       return;
     }
@@ -88,12 +88,12 @@ void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree){
 
   int currentNumberLabeled = changes->totalLabeled;
   if (setArgument(a, labelToSplit,changes,level + 1,printTree, splitting_search)){
-    findCompleteRec(g,changes,level +1, printTree);
+    findCompleteRec(g,changes,level +1, printTree, heuristic);
   }
   reverseChanges(changes, currentNumberLabeled); 
 
   if (setArgument(a, oppositLabel(labelToSplit),changes,level + 1,printTree, splitting_search)){
-    findCompleteRec(g,changes,level +1, printTree);
+    findCompleteRec(g,changes,level +1, printTree, heuristic);
   }
   reverseChanges(changes, currentNumberLabeled);
 }

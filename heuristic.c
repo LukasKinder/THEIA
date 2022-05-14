@@ -17,10 +17,12 @@ int OVER_NOTOUT = 0;
 int OVER_NOTUNDEC = 0;
 
 void printStatistics(){
-  printf("BLANK IN; %d \nBLANK OUT; %d \nBLANK UNDEC; %d \nNOTIN; %d \nNOTOUT %d \nNOTUNDEC; %d \n", OVER_BLANK_IN, OVER_BLANK_OUT,OVER_BLANK_UNDEC,OVER_NOTIN ,OVER_NOTOUT, OVER_NOTUNDEC);
+  printf("Splitting arguments was done over:\n");
+  printf("BLANK (IN-NOTIN): %d \nBLANK (OUT-NOTOUT): %d \nBLANK (UNDEC-NOTUNDEC): %d \nNOTIN: %d \nNOTOUT: %d \nNOTUNDEC: %d \n"
+      , OVER_BLANK_IN, OVER_BLANK_OUT,OVER_BLANK_UNDEC,OVER_NOTIN ,OVER_NOTOUT, OVER_NOTUNDEC);
 }
 
-int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestArgument, int level, int printTree){
+int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestArgument, int level, int printTree, char heuristic){
   
   Argument a;
   int currentNumberLabeled;
@@ -34,15 +36,15 @@ int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestAr
     }
     
     if (a->label == BLANK || a->label == NOTOUT || a->label == NOTUNDEC){
-      if (!lookAheadOption(g,changes,a, IN, &bestEstimatedTime, bestArgument, labelSplit,level,printTree)){
+      if (!lookAheadOption(g,changes,a, IN, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic)){
         return 0;
       }
     } else if (a->label == BLANK || a->label == NOTIN){
-      if (!lookAheadOption(g,changes,a, OUT, &bestEstimatedTime, bestArgument, labelSplit,level,printTree)){
+      if (!lookAheadOption(g,changes,a, OUT, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic)){
         return 0;
       }
     } else if (a->label == BLANK){
-      if (!lookAheadOption(g,changes,a, UNDEC, &bestEstimatedTime, bestArgument, labelSplit,level,printTree)){
+      if (!lookAheadOption(g,changes,a, UNDEC, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic)){
         return 0;
       }
     } 
@@ -76,8 +78,9 @@ int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestAr
   
 }
 
-int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *bestEstimatedTime, Argument *bestArgument, Label *labelSplit, int level, int printTree){
-  double t1,t2;
+int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *bestEstimatedTime, Argument *bestArgument
+    , Label *labelSplit, int level, int printTree, char heuristic){
+  double t1,t2, estimatedTime;
   int currentNumberLabeled = changes->totalLabeled;
   if (!setArgument(a,l,changes,level,false, look_ahead)){
     //This means the argument can not have label l and should get assigned the opposite label
@@ -89,7 +92,7 @@ int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *be
     }
     return 1;
   }else{
-    t1 = estimateSolvingtime(*changes);
+    t1 = estimateSolvingtime(*changes, heuristic);
     reverseChanges(changes, currentNumberLabeled);
     if (!setArgument(a,oppositLabel(l),changes,level,false, look_ahead)){
       //argument can not get labeled the opposite label of l and therefore gets labeled l 
@@ -98,13 +101,19 @@ int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *be
       return 1;
     }else{
       //both label options were possible
-      t2 = estimateSolvingtime(*changes);
+      t2 = estimateSolvingtime(*changes,heuristic);
       reverseChanges(changes, currentNumberLabeled);
     }
   }
 
-  if (t1 + t2 <= *bestEstimatedTime){
-    *bestEstimatedTime = t1 + t2;
+  if (heuristic == 'm'){
+    estimatedTime = t1 < t2 ? t2 : t1;
+  }else {
+    estimatedTime = t1 + t2;
+  }
+
+  if (estimatedTime <= *bestEstimatedTime){
+    *bestEstimatedTime = estimatedTime;
     *bestArgument = a;
     *labelSplit = l;
   }
@@ -112,10 +121,13 @@ int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *be
 }
 
 
-double estimateSolvingtime(ChangeList changes){
+double estimateSolvingtime(ChangeList changes, char heuristic){
   int n_blanks = changes.size - changes.totalLabeled;
   int n_intermediate= changes.size - changes.nFinalLabeled - n_blanks;
-  
-  return pow(3.0, (double)(n_blanks) / 20) * pow(2.0, (double)(n_intermediate) / 20);
+
+  if (heuristic == 'e'){
+    return pow(3.0, (double)(n_blanks) / 20) * pow(2.0, (double)(n_intermediate) / 20);
+  }
+  return 3 * n_blanks + 2*n_intermediate;
 }
 

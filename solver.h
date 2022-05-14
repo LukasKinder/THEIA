@@ -23,8 +23,8 @@ typedef struct ChangeList {
 
 ChangeList createChangeList();
 void freeChangeList(ChangeList changes);
-void findComplete(Graph graph, bool printTree);
-void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree);
+void findComplete(Graph graph, bool printTree, char heuristic);
+void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, char heuristic);
 void reverseChanges(ChangeList *changes, int till);
 
 void addChange(ChangeList *li, Argument a, Label newLabel, int level, bool printTree, Cause cause);
