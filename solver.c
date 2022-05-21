@@ -33,18 +33,21 @@ void findComplete(Graph g, bool printTree, char heuristic){
     if (a->numberAttackedBy == 0 && !a->selfAttack){
       //a does not have an attacker so it should be labeled IN
       if (!setIn(a, &changes,0,printTree, basecase1)){
+        printf("Error: applying base cases should not lead to contradictions!");
         exit(1); //creating the grounded extension should not create an error
       }  
     }
     if (a->selfAttack){
       //a does not have an attacker so it should be labeled IN
       if (!setNotIn(a, &changes,0,printTree, basecase2)){
+        printf("Error: applying base cases should not lead to contradictions!");
         exit(1); //creating the grounded extension should not create an error
       }  
     }
     if (a->numberAttackedBy == 0 && a->selfAttack){
       //a does not have an attacker so it should be labeled IN
       if (!setUndec(a, &changes,0,printTree, basecase3)){
+        printf("Error: applying base cases should not lead to contradictions!");
         exit(1); //creating the grounded extension should not create an error
       }  
     }

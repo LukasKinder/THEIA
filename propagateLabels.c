@@ -459,7 +459,7 @@ bool rule_15(Argument a, ChangeList *changes, int level, bool printTree){
   Argument b,c;
   for (int i  =0; i < a->numberIsAttacking; i++){
     b = a->isAttacking[i];
-    if ( b->label == NOTIN && b->numberAttackedBy - b->attackedByOut ==1) {
+    if ( b->label == NOTIN && b->numberAttackedBy - b->attackedByOut ==1 && !b->selfAttack) {
       //rule can be applied 
       for (int j = 0; j < b->numberAttackedBy; j++){
         c = b->attackedBy[j];
