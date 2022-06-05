@@ -7,9 +7,10 @@
 #include "solver.h"
 
 void printStatistics();
-int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestArgument, int level, int printTree, char heuristic);
-int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *bestEstimatedTime, Argument *bestArgument,
-         Label *labelSplit, int level, int printTree, char heuristic);
-double estimateSolvingtime(ChangeList changes, char heuristic);
+int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestArgument, int level, int printTree
+                ,char heuristic, SearchCharacteristics SC);
+int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *bestEstimatedTime, Argument *bestArgument
+    , Label *labelSplit, int level, int printTree, char heuristic, SearchCharacteristics SC);
+double estimateSolvingtime(ChangeList changes, char heuristic, SearchCharacteristics SC);
 
 #endif

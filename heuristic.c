@@ -22,7 +22,8 @@ void printStatistics(){
       , OVER_BLANK_IN, OVER_BLANK_OUT,OVER_BLANK_UNDEC,OVER_NOTIN ,OVER_NOTOUT, OVER_NOTUNDEC);
 }
 
-int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestArgument, int level, int printTree, char heuristic){
+int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestArgument, int level, int printTree
+                ,char heuristic, SearchCharacteristics SC){
   
   Argument a;
   int currentNumberLabeled;
@@ -36,21 +37,21 @@ int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestAr
     }
     
     if (a->label == BLANK || a->label == NOTOUT || a->label == NOTUNDEC){
-      if (!lookAheadOption(g,changes,a, IN, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic)){
+      if (!lookAheadOption(g,changes,a, IN, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic,SC)){
         return 0;
       }
     } else if (a->label == BLANK || a->label == NOTIN){
-      if (!lookAheadOption(g,changes,a, OUT, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic)){
+      if (!lookAheadOption(g,changes,a, OUT, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic,SC)){
         return 0;
       }
     } else if (a->label == BLANK){
-      if (!lookAheadOption(g,changes,a, UNDEC, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic)){
+      if (!lookAheadOption(g,changes,a, UNDEC, &bestEstimatedTime, bestArgument, labelSplit,level,printTree, heuristic,SC)){
         return 0;
       }
     } 
   }
 
-
+  //for the statistics
   if (*bestArgument != NULL){
     if ((*bestArgument)->label == BLANK){
       if (*labelSplit == IN){
@@ -79,7 +80,7 @@ int getArgument(Graph g,ChangeList *changes, Label *labelSplit, Argument *bestAr
 }
 
 int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *bestEstimatedTime, Argument *bestArgument
-    , Label *labelSplit, int level, int printTree, char heuristic){
+    , Label *labelSplit, int level, int printTree, char heuristic, SearchCharacteristics SC){
   double t1,t2, estimatedTime;
   int currentNumberLabeled = changes->totalLabeled;
   if (!setArgument(a,l,changes,level,false, look_ahead)){
@@ -92,7 +93,7 @@ int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *be
     }
     return 1;
   }else{
-    t1 = estimateSolvingtime(*changes, heuristic);
+    t1 = estimateSolvingtime(*changes, heuristic,SC);
     reverseChanges(changes, currentNumberLabeled);
     if (!setArgument(a,oppositLabel(l),changes,level,false, look_ahead)){
       //argument can not get labeled the opposite label of l and therefore gets labeled l 
@@ -101,7 +102,7 @@ int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *be
       return 1;
     }else{
       //both label options were possible
-      t2 = estimateSolvingtime(*changes,heuristic);
+      t2 = estimateSolvingtime(*changes,heuristic,SC);
       reverseChanges(changes, currentNumberLabeled);
     }
   }
@@ -121,13 +122,24 @@ int lookAheadOption(Graph g,ChangeList *changes, Argument a, Label l, double *be
 }
 
 
-double estimateSolvingtime(ChangeList changes, char heuristic){
+double estimateSolvingtime(ChangeList changes, char heuristic, SearchCharacteristics SC){
   int n_blanks = changes.size - changes.totalLabeled;
   int n_intermediate= changes.size - changes.nFinalLabeled - n_blanks;
 
   if (heuristic == 'e'){
     return pow(3.0, (double)(n_blanks) / 20) * pow(2.0, (double)(n_intermediate) / 20);
-  }
-  return 3 * n_blanks + 2*n_intermediate;
+  }else if (heuristic == 's' || heuristic == 'm'){
+    return 3 * n_blanks + 2*n_intermediate;
+  }else if (heuristic == 'a') {
+    //adaptive heuristic
+    float averageError = (float)(SC.numberErrors) / SC.numberPropagated;
+    float decreaseBLANK = (float)(SC.numberBlankPropagated) / SC.numberPropagated;
+    float decreaseIntermediate = (float)(SC.numberIntermediatePropagatied) / SC.numberPropagated;
+
+    return pow(3.0 -3*averageError , (double)(n_blanks)  / (1+decreaseBLANK)   )
+          *pow(2.0 -2*averageError , (double)(n_intermediate)    / (1+decreaseIntermediate)   );
+    }
+  printf("Error, unknown heuristic");
+  exit(1);
 }
 

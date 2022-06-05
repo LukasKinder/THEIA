@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "solver.h": "c"
+        "solver.h": "c",
+        "cmath": "c"
     }
 }

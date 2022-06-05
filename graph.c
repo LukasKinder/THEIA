@@ -26,6 +26,13 @@ Argument newArgument(char *name){
   return a;
 }
 
+
+int cmpfunc (const void * a, const void * b) {
+  const Node *arg_a = (Node *)a;
+  const Node *arg_b = (Node *)b;
+  return arg_a->numberIsAttacking - arg_b->numberIsAttacking;
+}
+
 void freeArgument(Argument a){
   free(a->name);
   free(a->attackedBy);

@@ -24,6 +24,7 @@ void freeChangeList(ChangeList changes){
 
 //finds all complete extensions and prints them
 void findComplete(Graph g, bool printTree, char heuristic){
+
   ChangeList changes = createChangeList(g.numberArguments);
   int i;
   Argument a;
@@ -55,22 +56,44 @@ void findComplete(Graph g, bool printTree, char heuristic){
 
   //printf("Grounded extension: ");
   //printInArguments(g);
+
+  SearchCharacteristics SC;
+  SC.numberPropagated =1;
+  SC.numberErrors = 0;
+  SC.numberIntermediatePropagatied = 1;
+  SC.numberBlankPropagated = 1;
   
-  findCompleteRec(g, &changes, 0, printTree, heuristic);
+  findCompleteRec(g, &changes, 0, printTree, heuristic, &SC);
   printf("]\n");
-  if (printTree) printStatistics();
+
+  float averageError = (float)(SC.numberErrors) / SC.numberPropagated;
+  float decreaseBLANK = (float)(SC.numberBlankPropagated) / SC.numberPropagated;
+  float decreaseIntermediate = (float)(SC.numberIntermediatePropagatied) / SC.numberPropagated;
+
+  if (printTree) {
+    printStatistics();
+    printf("Number of branches generated: %d \n",SC.numberPropagated);
+    printf("Number of contradicting branches detected: %d (%f percent of all branches)\n", SC.numberErrors,averageError*100);
+    printf("Average number of arguments labeled BLANK reciving a new label by propagating: %f\n", decreaseBLANK);
+    printf("Average number of arguments with intermediate labels reciving a final label by propagating: %f\n", decreaseIntermediate);
+  }
+
   freeChangeList(changes);
 }
 
 /*Function that checks if a solution is found, otherwise an argument is chosen to split the search*/
-void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, char heuristic){
+void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, char heuristic, SearchCharacteristics *SC){
 
   Argument a = NULL;
   Label labelToSplit;
   int c = 0;
+
+  SC->numberErrors++;
+  int currentNumberLabeled = changes->totalLabeled;
+
   while (a == NULL){
     c++;
-    if (!getArgument(g,changes,&labelToSplit, &a, level, printTree, heuristic)){
+    if (!getArgument(g,changes,&labelToSplit, &a, level, printTree, heuristic, *SC)){
       //contradiction found through look-ahead
       return;
     }
@@ -78,6 +101,7 @@ void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, cha
       //all arguments are labeled - a complete extension is found
       if (printTree) printInLevel("Solution found:",level);
       printInArguments(g);
+      SC->numberErrors--;
       return;
     }
     if (c> 100){
@@ -86,19 +110,45 @@ void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, cha
     }
   }
 
+  updateSC(*changes,currentNumberLabeled,SC);
+
+  //No error dectected, 
+  SC->numberErrors--;
+
   if (printTree) {printInLevel("Split search over argument ",level); printf("%s\n", a->name);}
+
+  if (rand() % 2 ==0 ){
+    labelToSplit = oppositLabel(labelToSplit);
+  }
   
 
-  int currentNumberLabeled = changes->totalLabeled;
+  currentNumberLabeled = changes->totalLabeled;
   if (setArgument(a, labelToSplit,changes,level + 1,printTree, splitting_search)){
-    findCompleteRec(g,changes,level +1, printTree, heuristic);
+    SC->numberPropagated++;
+    updateSC(*changes,currentNumberLabeled,SC);
+    findCompleteRec(g,changes,level +1, printTree, heuristic,SC);
   }
+
+
+
   reverseChanges(changes, currentNumberLabeled); 
 
   if (setArgument(a, oppositLabel(labelToSplit),changes,level + 1,printTree, splitting_search)){
-    findCompleteRec(g,changes,level +1, printTree, heuristic);
+    SC->numberPropagated++;
+    updateSC(*changes,currentNumberLabeled,SC);
+    findCompleteRec(g,changes,level +1, printTree, heuristic,SC);
   }
   reverseChanges(changes, currentNumberLabeled);
+}
+
+void updateSC(ChangeList changes, int currentNumberLabeled, SearchCharacteristics *SC){
+  for (int i = currentNumberLabeled; i < changes.totalLabeled; i++){
+    if (changes.previousLabels[i] == BLANK){
+      SC->numberBlankPropagated++;
+    }else{
+      SC->numberIntermediatePropagatied++;
+    }
+  }
 }
 
 

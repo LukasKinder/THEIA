@@ -6,7 +6,7 @@ the -v flag may be used to print the search tree
 
 the -p flag may be used as well but the only valid argument is EE-CO (finding all complete sets).
 
-the -h flag may be used to specify an heurist. Possible arguments are "min", "sum" and "exp"(default). 
+the -h flag may be used to specify an heurist. Possible arguments are "min", "sum", "exp" and "adp" (default). 
 
 Example:
 ./theia -p EE-CO  -f  example_ICCMA2019.tgf -h sum

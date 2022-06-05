@@ -18,13 +18,23 @@ typedef struct ChangeList {
   int nFinalLabeled;
 }ChangeList;
 
+//Keep track of characteristics during the search
+typedef struct SearchCharacteristics {
+  int numberIntermediatePropagatied;
+  int numberBlankPropagated;
+  int numberErrors;
+  int numberPropagated;
+
+}SearchCharacteristics;
+
 #include "heuristic.h"
 #include "propagateLabels.h"
 
 ChangeList createChangeList();
 void freeChangeList(ChangeList changes);
 void findComplete(Graph graph, bool printTree, char heuristic);
-void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, char heuristic);
+void findCompleteRec(Graph g,ChangeList *changes, int level, bool printTree, char heuristic, SearchCharacteristics *SC);
+void updateSC(ChangeList changes, int currentNumberLabeled, SearchCharacteristics *SC);
 void reverseChanges(ChangeList *changes, int till);
 
 void addChange(ChangeList *li, Argument a, Label newLabel, int level, bool printTree, Cause cause);

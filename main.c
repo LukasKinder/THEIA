@@ -32,6 +32,8 @@ char *parseArguments(int argc, char *argv[], bool * printTree, char * heuristic)
         *heuristic = 's';
       }else if (strcmp(argv[i+1], "exp") == 0){
         *heuristic = 'e';
+      }else if (strcmp(argv[i+1], "adp") == 0){
+        *heuristic = 'a';
       }else {
         printf("ERROR: Unknown heuristic\n");
         printErrorMessage();
@@ -46,7 +48,7 @@ char *parseArguments(int argc, char *argv[], bool * printTree, char * heuristic)
 
 int main(int argc, char *argv[]) {
   bool printTree = false; 
-  char heuristic = 'e';
+  char heuristic = 'a';
   char * input_file = parseArguments(argc, argv,&printTree,&heuristic);
   Graph graph = createGraph(input_file);
   findComplete(graph, printTree, heuristic); 

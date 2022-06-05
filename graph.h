@@ -76,6 +76,8 @@ typedef struct Node {
 
 } Node;
 
+int cmpfunc(const void * a, const void * b);
+
 Graph createGraph(char * filename);
 void addSelfAttack(Argument a);
 void addAttackedBy(Argument a, Argument b);
