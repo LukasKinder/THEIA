@@ -1,6 +1,6 @@
 complie with gcc *.c -lm -o theia
 
-run with "./theia -f <path>" with <path> being the path to some argumentation frame in trivial graph format 
+run with "./theia -f <path>" with <path> being the path to some argumentation frame in trivial graph format.
 
 the -v flag may be used to print the search tree
 
